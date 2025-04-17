@@ -1,9 +1,12 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, send_file
 from dotenv import load_dotenv
 import os
 import base64
 import requests
 from datetime import datetime
+import qrcode
+from io import BytesIO
+import json
 
 load_dotenv()
 
@@ -55,11 +58,7 @@ def lipa_na_mpesa(phone, amount):
     response.raise_for_status()
     return response.json()
 
-    
-import qrcode
-from io import BytesIO
-from flask import send_file, request, redirect, url_for
-
+# Generate QR Code Route
 @app.route('/generate', methods=['GET', 'POST'])
 def generate():
     if request.method == 'POST':
@@ -70,7 +69,11 @@ def generate():
             "number": number
         }
 
-        qr = qrcode.make(data)
+        # Convert the data dictionary to JSON string
+        data_str = json.dumps(data)
+
+        # Generate QR code
+        qr = qrcode.make(data_str)
         buf = BytesIO()
         qr.save(buf)
         buf.seek(0)
@@ -79,12 +82,12 @@ def generate():
 
     return render_template('generate.html')
 
-# Homepage
+# Homepage (Scan QR)
 @app.route('/')
 def index():
     return render_template('scan.html')
 
-# Payment route
+# Payment Route (Process Payment)
 @app.route('/pay', methods=['POST'])
 def pay():
     data = request.get_json()
@@ -96,6 +99,15 @@ def pay():
         return jsonify(response)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+# Callback Route (to handle Safaricom's callback)
+@app.route('/callback', methods=['POST'])
+def callback():
+    # This endpoint should handle the response from Safaricom after the STK push
+    # You may want to log the response or do further processing here
+    callback_data = request.json
+    print(callback_data)
+    return jsonify({"status": "success"}), 200
 
 # Run the app
 if __name__ == '__main__':
