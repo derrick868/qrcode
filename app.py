@@ -55,6 +55,30 @@ def lipa_na_mpesa(phone, amount):
     response.raise_for_status()
     return response.json()
 
+    
+import qrcode
+from io import BytesIO
+from flask import send_file, request, redirect, url_for
+
+@app.route('/generate', methods=['GET', 'POST'])
+def generate():
+    if request.method == 'POST':
+        method = request.form.get('method')
+        number = request.form.get('number')
+        data = {
+            "method": method,
+            "number": number
+        }
+
+        qr = qrcode.make(data)
+        buf = BytesIO()
+        qr.save(buf)
+        buf.seek(0)
+
+        return send_file(buf, mimetype='image/png')
+
+    return render_template('generate.html')
+
 # Homepage
 @app.route('/')
 def index():
