@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Generate QR</title>
+</head>
+<body>
+    <h2>Generate Payment QR Code</h2>
+    <form method="POST">
+        <label>Payment Method:</label>
+        <select name="method">
+            <option value="buygoods">Buy Goods</option>
+            <option value="paybill">Paybill</option>
+            <option value="pochi">Pochi La Biashara</option>
+        </select><br><br>
+        <label>Number:</label>
+        <input type="text" name="number" required><br><br>
+        <button type="submit">Generate QR</button>
+    </form>
+</body>
+</html>

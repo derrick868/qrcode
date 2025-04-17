@@ -1,0 +1,4 @@
+Flask
+qrcode[pil]
+requests
+python-dotenv

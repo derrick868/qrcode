@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Scan QR</title>
+    <script src="https://unpkg.com/html5-qrcode"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+        #reader {
+            margin: auto;
+            width: 300px;
+        }
+        #payment-form {
+            display: none;
+            margin-top: 20px;
+        }
+        input[type="number"] {
+            padding: 10px;
+            width: 150px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        #summary {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+
+    <h2>Scan Seller QR Code</h2>
+    <div id="reader"></div>
+
+    <div id="payment-form">
+        <h3>Payment Info</h3>
+        <p id="pay-method"></p>
+        <p id="pay-number"></p>
+ <form id="amount-form">
+    <label for="amount">Enter Amount (KES):</label><br>
+    <input type="number" id="amount" required min="1"><br><br>
+
+    <label for="phone">Enter Phone Number (07...):</label><br>
+    <input type="tel" id="phone" required pattern="07[0-9]{8}"><br><br>
+
+    <button type="submit">Proceed</button>
+</form>
+
+    </div>
+
+    <div id="summary"></div>
+
+    <script>
+        document.getElementById("amount-form").addEventListener("submit", function(e) {
+    e.preventDefault();
+
+    const amount = document.getElementById("amount").value;
+    const phone = document.getElementById("phone").value;
+
+    if (!paymentData || !amount || !phone) {
+        alert("Please fill all fields.");
+        return;
+    }
+
+    fetch('/pay', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            amount,
+            phone,
+            method: paymentData.method,
+            number: paymentData.number
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById("summary").innerHTML = `
+            <h3>STK Push Sent</h3>
+            <p>Method: ${paymentData.method}</p>
+            <p>Number: ${paymentData.number}</p>
+            <p>Amount: KES ${amount}</p>
+            <p>Phone: ${phone}</p>
+            <p><strong>Check your phone and enter your MPesa PIN to complete the payment.</strong></p>
+        `;
+        document.getElementById("payment-form").style.display = "none";
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Failed to send STK Push. Please try again.");
+    });
+});
+
+    </script>
+</body>
+</html>
